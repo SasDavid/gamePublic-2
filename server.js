@@ -2,25 +2,25 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
-const cors = require('cors')
+const cors = require('cors');
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server);
 
-
-// Permitir solicitudes desde cualquier origen (para pruebas)
+// CORS para rutas HTTP
 app.use(cors());
 
-// O permitir solo desde itch.io
-// app.use(cors({ origin: "https://tuusuario.itch.io" }));
+// CORS para WebSocket
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Cambia esto por "https://tuusuario.itch.io" en producción
+    methods: ["GET", "POST"]
+  }
+});
 
-
-
-// Servir archivos estáticos desde /public
+// Servir archivos estáticos si lo necesitas
 // app.use(express.static(path.join(__dirname, 'dist')));
 
-// Evento de conexión WebSocket
 io.on('connection', (socket) => {
   console.log('Cliente conectado:', socket.id);
 
@@ -34,7 +34,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// Escuchar en puerto
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Servidor activo en http://localhost:${PORT}`);
